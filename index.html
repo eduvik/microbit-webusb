@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="../microbit-webusb2/style.css">
     <meta charset="UTF-8">
-    <title>Micro:bit WebUSB Console</title>
+    <title>Micro:bit Data Downloader</title>
 </head>
 
 <body>
+<h1>Micro:bit CSV Data Downloader</h1>
     <div class="box">
         <div class="row header">
                 <button id="connect" class="button">Connect</button>
         </div>
         <div class="row header">
-                <button id="disconnect" class="button">Disconnect All</button>
+                <button id="disconnect" class="button" style="display: none;">Disconnect</button>
         </div>
         <div class="row header">
-                <button id="send" class="button">Send "Test" to All</button>
-        </div>
-        <div class="row header">
-                <button id="clear" class="button">Clear Console</button>
+            <button id="download" class="button" style="display: none;">Download Data File</button>
         </div>
 
         <div id="console" class="row content" style="overflow:auto;border:4px solid black;padding:2%">
@@ -29,10 +27,11 @@
 
 <!--  Include the webusb support library  -->
 <script src="ubitwebusb.js"></script>
+<script src="https://apis.google.com/js/api.js"> </script>
 
 <script>
 
-    // Append a line to the console frame
+
     function consolePrintln(message) {
         var con = document.getElementById("console")
         con.innerHTML += "<br/>"+message
@@ -41,12 +40,14 @@
 
     // List of connected devices (a single value could be used if only connecting to one device)
     var connectedDevices = []
+    var fileData = ""
 
     // Example event call-back handler
     function uBitEventHandler(reason, device, data) {
         switch(reason) {
             case "connected":
-                consolePrintln("<b>Connected!</b>")
+                consolePrintln("Connected!")
+                consolePrintln("Press both buttons A and B on the micro:bit")
                 connectedDevices.push(device)
                 break
             case "disconnected":
@@ -59,23 +60,38 @@
             case "error":
                 consolePrintln("<b>Error</b>")                
                 break
-            case "console":
-                consolePrintln("Console Data: " + data.data)
-                break
-            case "graph-event":
-                consolePrintln(`Graph Event:  ${data.data} (for ${data.graph}${data.series.length?" / series "+data.series:""})`)
-                break
-            case "graph-data":
-                consolePrintln(`Graph Data: ${data.data} (for ${data.graph}${data.series.length?" / series "+data.series:""})`)
+            case "data":
+                fileData += data.data
+                consolePrintln(data.data)
+                document.getElementById("download").style.display = "block"
                 break
         }
     }
+    function connect() {
+        uBitConnectDevice(uBitEventHandler);
+        document.getElementById("disconnect").style.display = "block"
+        document.getElementById("connect").style.display = "none"
+    }
+    function disconnect() {
+        connectedDevices.forEach(d=>uBitDisconnect(d))
+        document.getElementById("disconnect").style.display = "none"
+        document.getElementById("download").style.display = "none"
+        document.getElementById("connect").style.display = "block"
+    }
+    function download() {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(fileData));
+        element.setAttribute('download', "microbit_data.csv");
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
 
-    // Make the "go" button open the request devices box
-    document.getElementById("connect").addEventListener("click", () => uBitConnectDevice(uBitEventHandler))
-    document.getElementById("disconnect").addEventListener("click", () => connectedDevices.forEach(d=>uBitDisconnect(d)))
-    document.getElementById("clear").addEventListener("click", () => { document.getElementById("console").innerHTML = "" })
-    document.getElementById("send").addEventListener("click", () => { connectedDevices.forEach( d=>uBitSend(d, "Test")) })
+
+    document.getElementById("connect").addEventListener("click", connect)
+    document.getElementById("disconnect").addEventListener("click", disconnect)
+    document.getElementById("download").addEventListener("click", download)
 
 </script>
 

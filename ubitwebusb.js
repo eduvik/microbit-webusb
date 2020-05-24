@@ -78,32 +78,8 @@ function uBitOpenDevice(device, callback) {
             while(firstNewline>=0) {
                 let messageToNewline = buffer.slice(0,firstNewline)
                 let now = new Date() 
-                // Deal with line
-                // If it's a graph/series format, break it into parts
-                let parseResult = parser.exec(messageToNewline)
-                if(parseResult) {
-                    let graph = parseResult[1]
-                    let series = parseResult[2]
-                    let data = parseResult[3]
-                    let callbackType = "graph-event"
-                    // If data is numeric, it's a data message and should be sent as numbers
-                    if(!isNaN(data)) {
-                        callbackType = "graph-data"
-                        data = parseFloat(data)
-                    }
-                    // Build and send the bundle
-                    let dataBundle = {
-                        time: now,
-                        graph: graph, 
-                        series: series, 
-                        data: data
-                    }
-                    callback(callbackType, device, dataBundle)
-                } else {
-                    // Not a graph format.  Send it as a console bundle
-                    let dataBundle = {time: now, data: messageToNewline}
-                    callback("console", device, dataBundle)
-                }
+                let dataBundle = {time: now, data: messageToNewline}
+                callback("data", device, dataBundle)
 
                 buffer = buffer.slice(firstNewline+1)  // Advance to after newline
                 firstNewline = buffer.indexOf("\n")    // See if there's more data
@@ -170,13 +146,11 @@ function uBitSend(device, data) {
    <li>"connected": null</li>
    <li>"disconnected": null</li>
    <li>"error": error object</li>
-   <li>"console":  { "time":Date object "data":string}</li>
-   <li>"graph-data": { "time":Date object "graph":string "series":string "data":number}</li>
-   <li>"graph-event": { "time":Date object "graph":string "series":string "data":string}</li>
+   <li>"data":  { "time":Date object "data":string}</li>
   </ul>
 
  * @callback uBitEventCallback
- * @param {string} event ("connection failure", "connected", "disconnected", "error", "console", "graph-data", "graph-event" )
+ * @param {string} event ("connection failure", "connected", "disconnected", "error", "data" )
  * @param {USBDevice} device triggering the callback
  * @param {*} data (event-specific data object). See list above for variants
  * 
