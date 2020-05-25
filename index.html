@@ -47,12 +47,17 @@
         switch(reason) {
             case "connected":
                 consolePrintln("Connected!")
-                consolePrintln("Press both buttons A and B on the micro:bit")
+                consolePrintln("Press and hold both buttons A and B on the micro:bit")
                 connectedDevices.push(device)
+                document.getElementById("disconnect").style.display = "block"
+                document.getElementById("connect").style.display = "none"
                 break
             case "disconnected":
                 consolePrintln("<b>Disconnected</b>")
                 connectedDevices = connectedDevices.filter( v => v != device)
+                document.getElementById("disconnect").style.display = "none"
+                document.getElementById("download").style.display = "none"
+                document.getElementById("connect").style.display = "block"
                 break
             case "connection failure":
                 consolePrintln("<b>Connection Failure</b>")
@@ -61,7 +66,9 @@
                 consolePrintln("<b>Error</b>")                
                 break
             case "data":
-                fileData += data.data
+                if(data != "\n"){  // don't save blank lines to csv
+                    fileData += data.data
+                }
                 consolePrintln(data.data)
                 document.getElementById("download").style.display = "block"
                 break
@@ -69,14 +76,9 @@
     }
     function connect() {
         uBitConnectDevice(uBitEventHandler);
-        document.getElementById("disconnect").style.display = "block"
-        document.getElementById("connect").style.display = "none"
     }
     function disconnect() {
         connectedDevices.forEach(d=>uBitDisconnect(d))
-        document.getElementById("disconnect").style.display = "none"
-        document.getElementById("download").style.display = "none"
-        document.getElementById("connect").style.display = "block"
     }
     function download() {
         var element = document.createElement('a');
