@@ -21,8 +21,8 @@
 
         <div id="console" class="row content" style="overflow:auto;border:4px solid black;padding:2%">
             1. Plug in your micro:bit<br>
-            2. Click Connect<br>
-            3. Select <b>BBC micro:bit CMSIS-DAP<br>
+            2. Click the Connect button<br>
+            3. Select <b>BBC micro:bit CMSIS-DAP</b><br>
             4. Click Connect<br>
         </div>                            
     </div>
@@ -49,6 +49,7 @@
     function uBitEventHandler(reason, device, data) {
         switch(reason) {
             case "connected":
+                document.getElementById("console").innerHTML = ""
                 consolePrintln("Connected!")
                 consolePrintln("Press and hold both buttons A and B on the micro:bit")
                 connectedDevices.push(device)
