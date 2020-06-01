@@ -43,7 +43,8 @@
 
     // List of connected devices (a single value could be used if only connecting to one device)
     var connectedDevices = []
-    var fileData = ""
+    var filesData = {}
+    var currentFileName = "microbit_data.csv"
 
     // Example event call-back handler
     function uBitEventHandler(reason, device, data) {
@@ -70,8 +71,13 @@
                 consolePrintln("<b>Error</b>")                
                 break
             case "data":
-                if(data != "\n"){  // don't save blank lines to csv
-                    fileData += data.data
+                if(data.data != "\r"){  // don't save blank lines to csv
+                    if(data.data.startsWith("-----START:")){  // new filename marker; start new data set for new file
+                        currentFileName = data.data.trimRight().split(":")[1]
+                        filesData[currentFileName] = ""
+                    } else {
+                        filesData[currentFileName] += data.data + "\n"  //data seems to arrive with \r at end of line; make it into DOS newlines (\r\n)
+                    }
                 }
                 consolePrintln(data.data)
                 document.getElementById("download").style.display = "block"
@@ -85,14 +91,16 @@
         connectedDevices.forEach(d=>uBitDisconnect(d))
     }
     function download() {
-        var element = document.createElement('a');
-        element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(fileData));
-        element.setAttribute('download', "microbit_data.csv");
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-        fileData = "";
+        for (const [fileName, fileData] of Object.entries(filesData)) {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(fileData));
+            element.setAttribute('download', fileName);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+        filesData = {};
     }
 
 
