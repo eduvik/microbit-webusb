@@ -16,7 +16,7 @@
                 <button id="disconnect" class="button" style="display: none;">Disconnect</button>
         </div>
         <div class="row header">
-            <button id="download" class="button" style="display: none;">Download Data File</button>
+            <button id="download" class="button" style="display: none;">Download Data File (click "Allow" to the multiple files popup)</button>
         </div>
 
         <div id="console" class="row content" style="overflow:auto;border:4px solid black;padding:2%">
@@ -44,7 +44,7 @@
     // List of connected devices (a single value could be used if only connecting to one device)
     var connectedDevices = []
     var filesData = {}
-    var currentFileName = "microbit_data.csv"
+    var currentFileName = null
 
     // Example event call-back handler
     function uBitEventHandler(reason, device, data) {
@@ -75,7 +75,7 @@
                     if(data.data.startsWith("-----START:")){  // new filename marker; start new data set for new file
                         currentFileName = data.data.trimRight().split(":")[1]
                         filesData[currentFileName] = ""
-                    } else {
+                    } else if (currentFileName) {
                         filesData[currentFileName] += data.data + "\n"  //data seems to arrive with \r at end of line; make it into DOS newlines (\r\n)
                     }
                 }
@@ -101,6 +101,8 @@
             document.body.removeChild(element);
         }
         filesData = {};
+        document.getElementById("download").style.display = "none"
+        consolePrintln("Find the files in your Downloads Folder")
     }
 
 
