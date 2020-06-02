@@ -78,9 +78,9 @@
                     } else if (currentFileName) {
                         filesData[currentFileName] += data.data + "\n"  //data seems to arrive with \r at end of line; make it into DOS newlines (\r\n)
                     }
+                    consolePrintln(data.data)
+                    document.getElementById("download").style.display = "block"
                 }
-                consolePrintln(data.data)
-                document.getElementById("download").style.display = "block"
                 break
         }
     }
@@ -102,7 +102,7 @@
         }
         filesData = {};
         document.getElementById("download").style.display = "none"
-        consolePrintln("Find the files in your Downloads Folder")
+        consolePrintln('\n\n\nFind the files in your <b>Downloads Folder</b>\n\n\n')
     }
 
 
