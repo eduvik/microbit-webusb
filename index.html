@@ -94,7 +94,7 @@
         for (const [fileName, fileData] of Object.entries(filesData)) {
             var element = document.createElement('a');
             element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(fileData));
-            element.setAttribute('download', fileName);
+            element.setAttribute('download', "mbcc_" + fileName);
             element.style.display = 'none';
             document.body.appendChild(element);
             element.click();
